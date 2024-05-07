@@ -24,11 +24,12 @@ class Transaction extends Model
         'status',
     ];
 
+    public function user (){
+        return $this->belongsTo(User::class, 'users_id', 'id');
+    }
+
     public function Items(){
         return $this->hasMany(transactionItem::class, 'transactions_id', 'id');
     }
 
-    public function user (){
-        return $this->belongsTo(User::class, 'users_id', 'id');
-    }
 }

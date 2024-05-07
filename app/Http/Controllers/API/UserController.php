@@ -10,24 +10,37 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Validation\Validator;
 
 class UserController extends Controller
 {
     public function register(Request $request){
         try {
-            $request->validate([
+            $validator = validator($request->all(),
+                [
                     'name'=>['required', 'string', 'max:255'],
                     'email'=>['required', 'string', 'max:255','unique:users'],
                     'username'=>['required', 'string', 'max:255', 'unique:users'],
-                    'password'=>['required', 'string', 'max:255', password::default()],
                     'phone'=>['required', 'string', 'max:255'],
+                    'password'=>['required', 'string', 'max:255', password::default()],
                 ]);
+                if ($validator->fails()){
+                    return response()->json($validator->errors(),400);
+                }
+
+            // $request->validate([
+            //         'name'=>['required', 'string', 'max:255'],
+            //         'email'=>['required', 'string', 'max:255','unique:users'],
+            //         'username'=>['required', 'string', 'max:255', 'unique:users'],
+            //         'phone'=>['required', 'string', 'max:255'],
+            //         'password'=>['required', 'string', 'max:255', password::default()],
+            // ]);
 
             User::create([
                 'name'=>$request->name,
-                'usrname'=>$request->username,
+                'username'=>$request->username,
                 'email'=>$request->email,
-                'phone'=>$request->phone,
+                'phone'=>$request->phone_number,
                 'password'=>Hash::make($request->password),
             ]);
 
@@ -40,7 +53,7 @@ class UserController extends Controller
                 'token_type' => 'Bearer',
                 'user' => $user
             ], 'User Registered');
-
+            
         } catch (Exception $error) {
             return ResponseFormatter::error([
                 'message' => 'Something went wrong',
@@ -89,7 +102,7 @@ class UserController extends Controller
         return ResponseFormatter::success($request->user(), 'Data User Profile Berhasil Diambil');
     }
 
-    public function UpadateProfile(Request $request){
+    public function updateProfile(Request $request){
         $data = $request->all();
         $user = Auth::user();
         $user->update($data);

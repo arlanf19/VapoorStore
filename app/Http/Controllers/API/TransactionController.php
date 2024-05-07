@@ -18,6 +18,9 @@ class TransactionController extends Controller
 
         if($id){
             $transaction = Transaction::with(['items.product'])->find($id);
+           
+           if($transaction)
+           {
             return ResponseFormatter::success(
                 $transaction,
                 'Data Transaksi Berhasil Diambil'
@@ -29,6 +32,7 @@ class TransactionController extends Controller
                 404
             );
         }
+    }
 
         $transaction = Transaction::with(['items.product'])->where('users_id', Auth::user()->id);
         
@@ -55,13 +59,13 @@ class TransactionController extends Controller
         $transaction = Transaction::create([
             'users_id' => Auth::user()->id,
             'address' => $request->address,
-            'shipping_price' => $request->shipping_price,
             'total_price' => $request->total_price,
+            'shipping_price' => $request->shipping_price,
             'status' => $request->status,
         ]);
 
         foreach ($request->items as $product) {
-            TransactionItem::created([
+            TransactionItem::create([
                 'users_id' => Auth::user()->id,
                 'products_id' => $product['id'],
                 'transactions_id' => $transaction -> id,
